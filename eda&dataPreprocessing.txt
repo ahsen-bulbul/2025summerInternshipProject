@@ -1,0 +1,68 @@
+EDA (keşifsel veri analizi)
+Veri kümesinin öelliklerinin incelenmesi ve özetlenmesi. Veri setini anlamaya çalışmak, sorular sormak.
+1- verilerin özetlenmesi
+2- verilerin görselleştirilmesi
+3- eksik verileri belirleme
+4- aykırı değerlerin tespiti
+5- Hipotezlerin test edilmesi
+
+Veri Önişleme Adımları (Preprocessing)
+Veri öişleme RAG’ın ilk aşamasıdır ve amaç veriyi modele hazır hale getirmektir. EDA süreci sonunda fark edilen sorunlar burada çözümlenir. Şu adımlardan oluşur:
+
+1. Veri Temizleme
+Bu adımda veri setinde tespit edilen aykırı verilerin temzilenmesi, eksik verilerin tamamlanması ya da doldurulması işlemleri yapılır. Örneğin bir tabloda tekrar eden satır/sütunlar,  az benzerliğe sahip sütunların tespit edilmesi gibi. Bu saye veri setindeki gürültü azaltılmış olur. Veri setinde gürültü gerçek/anlamlı verilerden bağımsız olarak hatalı, yanıltıcı, rastgele verilerin olması durumudur. 
+
+ML’de klasik temizleme: eksik veriyi doldurma, hatalı veriyi silme.
+Derin öğrenmede: bazen eksik veya hatalı veriler “augmentasyon” (veri çoğaltma) ile düzeltilir; veri kaybı yerine modelin genellemesini artırmak amaçlanır.
+
+Eksik veri tamamlama ya da aykırı verilerin tespiti için ise farklı yöntemler kullanılabilir. Mesela eksik verilerin tespitinde bazı istatiksel testler/yöntemler kullanılabilir veya verilerin tamamlanmasında optimizasyon ya da regresyon gibi teknikler kullanılabilir. Bazı önrkler:
+-Normal verileri tanımlamak ve aykırı değerleri belirlemek için özet istatistikleri kullanmak
+-Aynı değere sahip olan veya varyansı 0 olan sütunların belirlenmesi ve kaldırılması
+-Yinelenen veri satırlarını belirleme ve bunları kaldırma
+-Boş değerleri eksik olarak işaretleme
+-İstatistikleri veya eğitilmiş bir model kullanarak eksik değerleri doldurmak
+
+2. Dil tespiti ve filtreleme
+birden fazla dil var mı?
+
+3.Bölütleme (chunking/segmentation)
+
+Chunking, büyük bir veriyi (metin, ses, görüntü, vb.) daha küçük, yönetilebilir parçalara bölme işlemidir.
+Sonrasında bu chunkların bir vektör temsili oluşturulacak. Seçilen chunk boyutu veri setinin yapısına göre değişebilir. 
+Çok küçük chunk → bağlam kaybı, anlamsız parçalar.
+Çok büyük chunk → bellekte yer sorunu, işlem yavaşlığı.
+Örnek: metin için genellikle 200-500 kelime arası chunk boyutu seçilir. Token bazlı chunklama daha sağlıklı. 
+Soru-cevap tarzında işlemler için küçük boyutlu chunk kullanımı daha etkili olacaktır.
+Arşiv tarama/belge arama işlerinde ise daha büyük chunk’lar tercih edilir ki kullanıcı büyük çaplı bir arama yapıyor olabilir. 
+
+
+Chunking Yöntemleri
+1. Sabit boyutlu chunking
+Her chunk aynı uzunlukta
+2. Bağlamsal chunking
+Cümle, paragraf gibi mantıksal chunklara bölme. Bağlam kaybı azaltılır.
+3. Sliding Chunking
+Chunklar birbiriyle kısmen çakışacak şekilde oluşturulur ve bağlam kaybı azaltılmış olur.
+
+4. Normalize Etme
+Verideki farklı yazım ve biçimleri standart bi formata çevirmek. Stopwordlerin kaldırılması, stemming, lemmatization , tarihleri vs. sayılara çevirme
+
+5. Metadata eklenmesi
+Her doküman parçasına ait:
+Başlık
+Tarih
+Kategori
+Yazar
+URL
+Bu bilgiler, aramada filtreleme veya sıralama için kullanılabilir.
+
+6. Embedding Hazırlığı
+Temizlenmiş ve bölünmüş metinler embedding modeline verilecek hale getirilir.
+Model her chunk için bir vektör (örn. 768 boyutlu) üretir.
+Bu vektörler vektör veritabanına (Pinecone, Weaviate, FAISS, Milvus vb.) kaydedilir.
+
+7. Sorgu Önişleme
+Sorgu da aynı aşamalardan geçirilir.
+
+8. Benzerlik Hesaplama
+Sorgu vektörü ile veritabanındaki vektörler arasında benzerlik (cosine similarity, dot product vb.) hesaplanır. En yüksek skor alan dokümanlar getirilebilir.
