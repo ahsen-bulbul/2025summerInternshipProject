@@ -1,0 +1,43 @@
+[
+    {
+      "query": "Yargıtay 6. Hukuk Dairesi kira sözleşmesiyle ilgili hangi kararı verdi?",
+      "expected_keywords": ["6. Hukuk Dairesi", "kira", "sözleşme"]
+    },
+    {
+      "query": "Müteselsil borç kavramı hangi kararda nasıl yorumlandı?",
+      "expected_keywords": ["müteselsil borç", "Borçlar Kanunu", "sorumluluk"]
+    },
+    {
+      "query": "Yargıtay 13. Hukuk Dairesi'nin karar gerekçesi nedir?",
+      "expected_keywords": ["13. Hukuk Dairesi", "gerekçe", "karar"]
+    },
+    {
+      "query": "Tazminat davalarında hangi esaslara göre hüküm verilmektedir?",
+      "expected_keywords": ["tazminat", "esas", "hüküm"]
+    },
+    {
+      "query": "Hangi davada taraflar arasında sözleşme feshi söz konusuydu?",
+      "expected_keywords": ["fesih", "sözleşme", "taraf"]
+    },
+    {
+      "query": "Yargıtay hangi kararda usul hatası nedeniyle bozma kararı verdi?",
+      "expected_keywords": ["bozma", "usul hatası", "karar"]
+    },
+    {
+      "query": "Mahkeme kararında davacının talebi ne şekilde değerlendirilmiştir?",
+      "expected_keywords": ["davacı", "talep", "değerlendirme"]
+    },
+    {
+      "query": "İş mahkemesi kararlarında işçi alacakları nasıl hükme bağlanıyor?",
+      "expected_keywords": ["işçi", "alacak", "iş mahkemesi"]
+    },
+    {
+      "query": "Hangi kararda icra takibine ilişkin hüküm yer alıyor?",
+      "expected_keywords": ["icra", "takip", "hüküm"]
+    },
+    {
+      "query": "Borçlu temerrüdü hangi içtihatta nasıl açıklanmıştır?",
+      "expected_keywords": ["borçlu", "temerrüt", "içtihat"]
+    }
+  ]
+  

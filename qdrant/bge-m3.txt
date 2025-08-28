@@ -1,0 +1,26 @@
+chonkie semantik chunking
+
+1. Arama: 'ihtiyati önlem tazminat' - 3 sonuç
+
+1. Sonuç (Skor: 0.634)
+   Esas No: 2022/3281 E.
+   Karar No: 2024/117 K.
+   Metin: 1. Asliye Hukuk Mahkemesinin 2009/139 D. ... dosyası üzerinden ihtiyati tedbir konularak inşaatın durdurulduğunu, HUMK'un 109. maddesi gereğince ihtiyati tedbir kararının verildiği tarihten itibaren 1...
+
+2. Sonuç (Skor: 0.631)
+   Esas No: 2022/3281 E.
+   Karar No: 2024/117 K.
+   Metin: 2. İlgili Hukuk 6100 sayılı Hukuk Muhakemeleri Kanununun geçici 3 üncü maddesinin ikinci fıkrası atfıyla uygulanmasına devam olunan mülga 1086 sayılı Hukuk Usulü Muhakemeleri Kanununun 428 inci, 439 u...
+
+3. Sonuç (Skor: 0.618)
+   Esas No: 2022/3281 E.
+   Karar No: 2024/117 K.
+   Metin: ... sayılı dosyası üzerinden 25.12.2009 tarihinde inşaatın durdurulması yönünde ihtiyati tedbir kararı verildiği, teminatın 31.12.2009 tarihinde yatırıldığı, 04.01.2010 tarihinde mahkemece, İcra Müdür...
+
+2. Filtreli Arama: '6. Hukuk Dairesi' - 10 sonuç
+
+1. Sonuç (Skor: 0.555)
+   Esas No: 2024/21 E.
+   Metin: 6. Hukuk Dairesi 2024/21 E. , 2024/463 K. \n "İçtihat Metni" MAHKEMESİ : ... Bölge Adliye Mahkemesi 23. Hukuk Dairesi Taraflar arasındaki konkordatonu...
+
+---------------------------------------------------------
