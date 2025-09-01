@@ -1,3 +1,8 @@
+token_name=vscodepush
+token=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
+
+------------------------------------------------------------------------------------------------------------------
+
 EDA (keşifsel veri analizi)
 Veri kümesinin öelliklerinin incelenmesi ve özetlenmesi. Veri setini anlamaya çalışmak, sorular sormak.
 1- verilerin özetlenmesi
