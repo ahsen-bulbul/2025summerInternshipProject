@@ -1,0 +1,1 @@
+chunker = semchunk.chunkerify(tiktoken.get_encoding("cl100k_base"), config["token_size"])
