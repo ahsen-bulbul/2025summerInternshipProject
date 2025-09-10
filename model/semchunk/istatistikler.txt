@@ -1,0 +1,21 @@
+google/google_embeddinggemma-300m 
+📊 Pipeline Süreleri ve İstatistikler:
+{
+  "collection_name": "google_embeddinggemma_chunks",
+  "points_uploaded": 80345,
+  "chunk_creation_time_s": 48.3,
+  "embedding_and_upload_time_s": 1026.15,
+  "total_pipeline_time_s": 1074.97
+}
+dimension 512
+embedding batch size 100
+qdrant batch size 256
+test2
+📊 Pipeline Süreleri ve İstatistikler:
+{
+  "collection_name": "google_embeddinggemma_chunks",
+  "points_uploaded": 80345,
+  "chunk_creation_time_s": 45.5,
+  "embedding_and_upload_time_s": 1044.78,
+  "total_pipeline_time_s": 1090.75
+}
