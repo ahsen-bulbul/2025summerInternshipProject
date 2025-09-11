@@ -19,3 +19,12 @@ test2
   "embedding_and_upload_time_s": 1044.78,
   "total_pipeline_time_s": 1090.75
 }
+test3
+📊 Pipeline Süreleri ve İstatistikler:
+{
+  "collection_name": "google_normal_chunks",
+  "points_uploaded": 80345,
+  "chunk_creation_time_s": 45.28,
+  "embedding_and_upload_time_s": 1030.32,
+  "total_pipeline_time_s": 1075.95
+}
