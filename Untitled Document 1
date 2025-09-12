@@ -1,1 +1,28 @@
 chunker = semchunk.chunkerify(tiktoken.get_encoding("cl100k_base"), config["token_size"])
+
+def search_semantic(self, query: str, limit: int = 10, score_threshold: float = 0.7) -> List[Dict]:
+        """Düzeltilmiş search metodu - 512 dimension uyumlu"""
+        
+        # Query embedding çıkar (768 boyut)
+        query_embedding = self.model.encode([query], convert_to_tensor=True).to('cuda:0')
+        query_embedding = query_embedding.clone().detach()
+        
+        # Boyutu 512'ye düşür (aynı reducer kullanarak)
+        with torch.no_grad():  # Inference modunda
+            reduced_query_embedding = self.reducer(query_embedding)
+        
+        # CPU'ya taşı ve numpy array'e çevir
+        query_vector = reduced_query_embedding[0].cpu().numpy().tolist()
+        
+        print(f"🔍 Query vector boyutu: {len(query_vector)} (hedef: {self.config.DIMENSION})")
+        
+        # Qdrant araması
+        search_results = self.qdrant_client.search(
+            collection_name=self.config.COLLECTION_NAME,
+            query_vector=query_vector,
+            limit=limit,
+            score_threshold=score_threshold
+        )
+        
+        results = [{'score': p.score, 'payload': p.payload} for p in search_results]
+        return results
