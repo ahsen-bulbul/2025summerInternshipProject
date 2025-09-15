@@ -14,15 +14,9 @@ from FlagEmbedding import BGEM3FlagModel
 from config import Config
 import os
 from dotenv import load_dotenv
+from qdrant_client.models import Prefetch, FusionQuery, Fusion, SparseVector
 
 print(load_dotenv("/home/yapayzeka/ahsen_bulbul/qdrant/.env"))
-
-def l2_normalize_tensor(t: torch.Tensor, eps: float = 1e-10) -> torch.Tensor:
-    if t.dim() == 1:
-        norm = torch.norm(t).clamp(min=eps)
-        return t / norm
-    norm = torch.norm(t, dim=1, keepdim=True).clamp(min=eps)
-    return t / norm
 
 class YargitaySemanticProcessor:
     def __init__(self, config: Config):
@@ -281,7 +275,7 @@ class YargitaySemanticProcessor:
 
     def search_hybrid(self, query: str, limit: int = 10, score_threshold: float = None) -> List[Dict]:
         """
-        Dense + Sparse (TF-IDF) hybrid search
+        Dense + Sparse (TF-IDF) hybrid search using query points and prefetch
         """
         try:
             # --- Dense tarafı (BGE embeddings) ---
@@ -294,43 +288,56 @@ class YargitaySemanticProcessor:
             # Dense vektör
             q_dense = emb_res.get("dense_vecs", [[0.0]*self.config.EMBEDDING_DIM])[0]
             q_dense = q_dense[:self.config.EMBEDDING_DIM]  # boyut kırpma
-            query_dense = NamedVector(
-                name="dense_vec",
-                vector=q_dense
-            )
 
-            # Sparse vektör (senin TF-IDF çıktın)
+            # Sparse vektör (TF-IDF çıktısı)
             query_sparse = None
             sparse_raw = emb_res.get("sparse_vecs", [None])[0]
             if sparse_raw and "indices" in sparse_raw and "values" in sparse_raw:
-                query_sparse = NamedSparseVector(
-                    name="sparse_vec",
-                    vector=SparseVector(
-                        indices=sparse_raw["indices"],
-                        values=sparse_raw["values"]
-                    )
+                sparse_vector = SparseVector(
+                    indices=sparse_raw["indices"],
+                    values=sparse_raw["values"]
                 )
+            else:
+                sparse_vector = None
 
-            # --- Search requests ---
-            requests = [SearchRequest(vector=query_dense, limit=limit, with_payload=True, score_threshold=score_threshold)]
-            if query_sparse:
-                requests.append(SearchRequest(vector=query_sparse, limit=limit, score_threshold=score_threshold))
+            # --- Prefetch ile hybrid arama ---
+            prefetch = []
+            
+            # Dense prefetch
+            prefetch.append(Prefetch(
+                query=q_dense,
+                limit=limit * 2,  # Daha fazla candidate al
+                score_threshold=score_threshold
+            ))
+            
+            # Sparse prefetch (varsa)
+            if sparse_vector:
+                prefetch.append(Prefetch(
+                    query=sparse_vector,
+                    limit=limit * 2,
+                    score_threshold=score_threshold
+                ))
 
-            qr = self.qdrant_client.search_batch(
+            # --- Ana query (RRF fusion ile) ---
+            search_result = self.qdrant_client.query_points(
                 collection_name=self.config.COLLECTION_NAME,
-                requests=requests,
+                prefetch=prefetch,
+                query=FusionQuery(fusion=Fusion.RRF),  # RRF fusion
+                limit=limit,
+                score_threshold=score_threshold,
+                with_payload=True
             )
 
-            # --- Sonuçları topla ---
+            # --- Sonuçları formatla ---
             results = []
-            for request_result in qr:  # her request_result: List[ScoredPoint]
-                for scored_point in request_result:
-                    results.append({
-                        "score": scored_point.score,
-                        "payload": scored_point.payload
-                    })
+            for point in search_result.points:
+                results.append({
+                    "score": point.score,
+                    "payload": point.payload,
+                    "id": point.id
+                })
 
-            print(f"📊 {len(results)} sonuç bulundu (Dense + TF-IDF Sparse)")
+            print(f"📊 {len(results)} sonuç bulundu (Hybrid Search - Prefetch + RRF)")
             return results
 
         except Exception as e:
