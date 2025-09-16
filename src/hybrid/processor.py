@@ -14,9 +14,12 @@ from FlagEmbedding import BGEM3FlagModel
 from config import Config
 import os
 from dotenv import load_dotenv
-from qdrant_client.models import Prefetch, FusionQuery, Fusion, SparseVector
-
+from fastembed import SparseTextEmbedding, SparseEmbedding
 print(load_dotenv("/home/yapayzeka/ahsen_bulbul/qdrant/.env"))
+
+model_name = "Qdrant/bm25"
+# This triggers the model download
+model = SparseTextEmbedding(model_name=model_name)
 
 class YargitaySemanticProcessor:
     def __init__(self, config: Config):
@@ -167,14 +170,22 @@ class YargitaySemanticProcessor:
                         dense_clean.append(vec[:self.config.EMBEDDING_DIM])
 
                 # TF-IDF ile sparse embedding üret
-                from sklearn.feature_extraction.text import TfidfVectorizer
-                vectorizer = TfidfVectorizer(max_features=5000)
-                X_sparse = vectorizer.fit_transform(batch_texts)
-                sparse_vectors = []
-                for row in X_sparse:
-                    row_coo = row.tocoo()
-                    sparse_vectors.append({"indices": row_coo.col.tolist(), "values": row_coo.data.tolist()})
+                # from sklearn.feature_extraction.text import TfidfVectorizer
+                # vectorizer = TfidfVectorizer(max_features=5000)
+                # X_sparse = vectorizer.fit_transform(batch_texts)
+                # sparse_vectors = []
+                # for row in X_sparse:
+                #     row_coo = row.tocoo()
+                #     sparse_vectors.append({"indices": row_coo.col.tolist(), "values": row_coo.data.tolist()})
 
+                sparse_vectors = []
+                for text in batch_texts:
+                    # SparseEmbedding üret
+                    sparse_embedding = list(model.embed(text))[0]  # ilk embedding
+                    sparse_vectors.append({
+                        "indices": sparse_embedding.indices.tolist(),
+                        "values": sparse_embedding.values.tolist()
+                    })
                 # Listeye ekle
                 all_embeddings_dense.extend(dense_clean)
                 all_embeddings_sparse.extend(sparse_vectors)
@@ -198,7 +209,7 @@ class YargitaySemanticProcessor:
         print(f"🚀 {len(chunks)} chunk Qdrant'a yükleniyor...")
         texts = [c['text'] for c in chunks]
         embeddings_dense, embeddings_sparse = self.create_embeddings_bge(texts)
-
+        
         points = []
         
         for c, d, s in zip(chunks, embeddings_dense, embeddings_sparse):
@@ -275,7 +286,7 @@ class YargitaySemanticProcessor:
 
     def search_hybrid(self, query: str, limit: int = 10, score_threshold: float = None) -> List[Dict]:
         """
-        Dense + Sparse (TF-IDF) hybrid search using query points and prefetch
+        Dense + Sparse (TF-IDF) hybrid search
         """
         try:
             # --- Dense tarafı (BGE embeddings) ---
@@ -288,56 +299,43 @@ class YargitaySemanticProcessor:
             # Dense vektör
             q_dense = emb_res.get("dense_vecs", [[0.0]*self.config.EMBEDDING_DIM])[0]
             q_dense = q_dense[:self.config.EMBEDDING_DIM]  # boyut kırpma
+            query_dense = NamedVector(
+                name="dense_vec",
+                vector=q_dense
+            )
 
-            # Sparse vektör (TF-IDF çıktısı)
+            # Sparse vektör (senin TF-IDF çıktın)
             query_sparse = None
             sparse_raw = emb_res.get("sparse_vecs", [None])[0]
             if sparse_raw and "indices" in sparse_raw and "values" in sparse_raw:
-                sparse_vector = SparseVector(
-                    indices=sparse_raw["indices"],
-                    values=sparse_raw["values"]
+                query_sparse = NamedSparseVector(
+                    name="sparse_vec",
+                    vector=SparseVector(
+                        indices=sparse_raw["indices"],
+                        values=sparse_raw["values"]
+                    )
                 )
-            else:
-                sparse_vector = None
 
-            # --- Prefetch ile hybrid arama ---
-            prefetch = []
-            
-            # Dense prefetch
-            prefetch.append(Prefetch(
-                query=q_dense,
-                limit=limit * 2,  # Daha fazla candidate al
-                score_threshold=score_threshold
-            ))
-            
-            # Sparse prefetch (varsa)
-            if sparse_vector:
-                prefetch.append(Prefetch(
-                    query=sparse_vector,
-                    limit=limit * 2,
-                    score_threshold=score_threshold
-                ))
+            # --- Search requests ---
+            requests = [SearchRequest(vector=query_dense, limit=limit, with_payload=True, score_threshold=score_threshold)]
+            if query_sparse:
+                requests.append(SearchRequest(vector=query_sparse, limit=limit, score_threshold=score_threshold))
 
-            # --- Ana query (RRF fusion ile) ---
-            search_result = self.qdrant_client.query_points(
+            qr = self.qdrant_client.search_batch(
                 collection_name=self.config.COLLECTION_NAME,
-                prefetch=prefetch,
-                query=FusionQuery(fusion=Fusion.RRF),  # RRF fusion
-                limit=limit,
-                score_threshold=score_threshold,
-                with_payload=True
+                requests=requests,
             )
 
-            # --- Sonuçları formatla ---
+            # --- Sonuçları topla ---
             results = []
-            for point in search_result.points:
-                results.append({
-                    "score": point.score,
-                    "payload": point.payload,
-                    "id": point.id
-                })
+            for request_result in qr:  # her request_result: List[ScoredPoint]
+                for scored_point in request_result:
+                    results.append({
+                        "score": scored_point.score,
+                        "payload": scored_point.payload
+                    })
 
-            print(f"📊 {len(results)} sonuç bulundu (Hybrid Search - Prefetch + RRF)")
+            print(f"📊 {len(results)} sonuç bulundu (Dense + TF-IDF Sparse)")
             return results
 
         except Exception as e:
