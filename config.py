@@ -10,7 +10,7 @@ class Config:
     ENCODING_NAME: str = "cl100k_base"
     QDRANT_URL: str = "http://localhost:6333"
     COLLECTION_NAME: str = "DENEME"
-    CSV_FILE: str = "/home/yapayzeka/ahsen_bulbul/data/cleaned10chunk.csv"
+    CSV_FILE: str = "/home/ahsen/Masaüstü/stajProjesi/2025summerInternshipProject/data/cleaned10chunk.csv"
     BATCH_SIZE: int = 100
     DB_BATCH: int = 256
     #model seçimine göre değişen özellikler

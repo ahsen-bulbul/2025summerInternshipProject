@@ -2,7 +2,6 @@ import pandas as pd
 import torch
 import uuid
 import json
-
 from typing import List, Dict
 from qdrant_client import QdrantClient, models
 from qdrant_client.models import NamedVector, NamedSparseVector, SparseVector, PointStruct, SearchRequest, SparseVectorParams
@@ -37,7 +36,7 @@ class YargitaySemanticProcessor:
         self.qdrant_client = QdrantClient(url=config.QDRANT_URL)
 
         device_name = torch.cuda.get_device_name() if torch.cuda.is_available() else "CPU"
-        print(f"✅ Hazır - Cihaz: {device_name}")
+        print(f"✅ Hazır - Cihaz: {device_name}")a
 
     # Test connection & print dense+sparse
     def test_bge_connection(self):
